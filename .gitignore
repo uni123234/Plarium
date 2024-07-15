@@ -2,3 +2,5 @@
 *pycache*
 *.idea*
 *idea*
+*.db*
+*.db-journal*
