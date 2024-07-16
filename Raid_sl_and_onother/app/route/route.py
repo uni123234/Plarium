@@ -40,17 +40,20 @@ def index():
 def register():
     """
     Route to register a new user.
-    Expects a JSON payload with username, email, phone, and password.
+    Handles form submission with fields: username, email, phone, and password.
     """
     if request.method == 'POST':
-        data = request.get_json() or request.form
+        username = request.form.get('username')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        password = request.form.get('password')
 
         # Validate request data
-        if not all(key in data for key in ('username', 'email', 'phone', 'password')):
+        if not all([username, email, phone, password]):
             return render_template('register.html', error='Username, email, phone, and password are required')
 
-        user = User(username=data['username'], email=data['email'], phone=data['phone'])
-        user.set_password(data['password'])
+        user = User(username=username, email=email, phone=phone)
+        user.set_password(password)
         session.add(user)
 
         try:
@@ -68,26 +71,26 @@ def register():
 def login():
     """
     Route to log in an existing user.
-    Expects a JSON payload with identifier (username, email, or phone) and password
-    or form data with identifier and password.
+    Handles form submission with fields: identifier (username, email, or phone) and password.
     """
     if request.method == 'POST':
-        data = request.get_json() or request.form
+        identifier = request.form.get('identifier')
+        password = request.form.get('password')
 
         # Validate request data
-        if not all(key in data for key in ('identifier', 'password')):
+        if not all([identifier, password]):
             return render_template('login.html', error='Identifier and password are required')
 
         user = session.query(User).filter(
-            (User.username == data['identifier']) |
-            (User.email == data['identifier']) |
-            (User.phone == data['identifier'])
+            (User.username == identifier) |
+            (User.email == identifier) |
+            (User.phone == identifier)
         ).first()
 
-        if user is None or not user.check_password(data['password']):
+        if user is None or not user.check_password(password):
             return render_template('login.html', error='Invalid identifier or password')
 
-        token = generate_password_hash(data['identifier'] + data['password'])
+        token = generate_password_hash(identifier + password)
         tokens[user.id] = token
 
         return render_template('login.html', message='Login successful', token=token)
@@ -95,14 +98,14 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/edit_user', methods=['PUT'])
+@app.route('/edit_user', methods=['PUT', 'POST'])
 @login_required
 def edit_user():
     """
     Route to edit user details.
-    Expects a JSON payload with optional fields: username, email, phone, password.
+    Handles form submission or JSON payload with optional fields: username, email, phone, password.
     """
-    data = request.get_json()
+    data = request.get_json() or request.form
     token = request.headers.get('Authorization')
     user_id = [key for key, value in tokens.items() if value == token][0]
 
@@ -123,47 +126,48 @@ def edit_user():
         session.rollback()
         return jsonify({'error': 'Username, email, or phone number already exists'}), 400
 
-    return jsonify({'message': 'User updated successfully'}), 200
+    return render_template('edit_user.html', message='User updated successfully')
 
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     """
     Route to request a password reset.
-    Expects a JSON payload with identifier (username, email, or phone).
+    Handles form submission with field: identifier (username, email, or phone).
     """
     if request.method == 'POST':
-        data = request.get_json() or request.form
+        identifier = request.form.get('identifier')
 
         # Validate request data
-        if 'identifier' not in data:
-            return render_template('reset.html', error='Identifier is required')
+        if not identifier:
+            return render_template('reset_request.html', error='Identifier is required')
 
         user = session.query(User).filter(
-            (User.username == data['identifier']) |
-            (User.email == data['identifier']) |
-            (User.phone == data['identifier'])
+            (User.username == identifier) |
+            (User.email == identifier) |
+            (User.phone == identifier)
         ).first()
 
         if user is None:
-            return render_template('reset.html', error='User not found')
+            return render_template('reset_request.html', error='User not found')
 
         user.generate_reset_token()
         session.commit()
 
-        return render_template('reset.html', message='Password reset token generated', reset_token=user.reset_token)
+        return render_template('reset_request.html', message='Password reset token generated', reset_token=user.reset_token)
 
-    return render_template('reset.html')
+    return render_template('reset_request.html')
+
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     """
     Route to reset the password.
-    Expects a JSON payload with reset_token and new_password.
+    Handles form submission with fields: reset_token and new_password.
     """
     if request.method == 'POST':
-        data = request.get_json() or request.form
+        data = request.form
 
         # Validate request data
         if not all(key in data for key in ('reset_token', 'new_password')):
@@ -191,53 +195,68 @@ def help():
     return render_template('help.html')
 
 
-@app.route('/helps_p_r', methods=['POST'])
+@app.route('/helps_p_r', methods=['GET', 'POST'])
 def add_guide_pilarium():
     """
     Route to add a new guide for "Raid Shadow Legends".
-    Expects a JSON payload with content, link, video, and image.
+    Handles form submission with fields: content, link, video, and image.
     """
-    data = request.get_json()
+    if request.method == 'POST':
+        content = request.form.get('content')
+        link = request.form.get('link')
+        video = request.form.get('video')
+        image = request.form.get('image')
 
-    # Validate request data
-    if not all(key in data for key in ('content', 'link', 'video', 'image')):
-        return jsonify({'error': 'Content, link, video, and image are required'}), 400
+        # Validate request data
+        if not all([content, link, video, image]):
+            return render_template('help_raid_sl_request.html', error='Content, link, video, and image are required'), 400
 
-    game_name = ""
-    game = session.query(Game).filter_by(name=game_name).first()
-    if not game:
-        return jsonify({'error': f'Game {game_name} not found'}), 404
+        game_name = "Raid Shadow Legends"
+        game = session.query(Game).filter_by(name=game_name).first()
+        if not game:
+            return render_template('help_raid_sl_request.html', error=f'Game {game_name} not found'), 404
 
-    new_guide = PilariumGuide(content=data['content'], link=data['link'], video=data['video'], image=data['image'])
-    game.guides.append(new_guide)
-    session.add(new_guide)
-    session.commit()
+        new_guide = PilariumGuide(content=content, link=link, video=video, image=image)
+        game.guides.append(new_guide)
+        session.add(new_guide)
+        session.commit()
 
-    return render_template('help_raid_sl_request.html', message='New guide added successfully for Raid Shadow Legends'), 201
+        return render_template('help_raid_sl_request.html', message='New guide added successfully for Raid Shadow Legends'), 201
+
+    return render_template('help_raid_sl_request.html')
 
 
-@app.route('/help_o_r', methods=['POST'])
+
+@app.route('/help_o_r', methods=['GET', 'POST'])
 def add_guide_all_games():
     """
     Route to add a new guide for any game.
-    Expects a JSON payload with game_name, content, link, video, and image.
+    Handles form submission with fields: game_name, content, link, video, and image.
     """
-    data = request.get_json()
+    if request.method == 'POST':
+        game_name = request.form.get('game_name')
+        content = request.form.get('content')
+        link = request.form.get('link')
+        video = request.form.get('video')
+        image = request.form.get('image')
 
-    # Validate request data
-    if not all(key in data for key in ('game_name', 'content', 'link', 'video', 'image')):
-        return jsonify({'error': 'Game name, content, link, video, and image are required'}), 400
+        # Validate request data
+        if not all([game_name, content, link, video, image]):
+            return render_template('help_request_onother.html', error='All fields are required'), 400
 
-    game = session.query(Game).filter_by(name=data['game_name']).first()
-    if not game:
-        return jsonify({'error': f'Game {data["game_name"]} not found'}), 404
+        game = session.query(Game).filter_by(name=game_name).first()
+        if not game:
+            return render_template('help_request_onother.html', error=f'Game {game_name} not found'), 404
 
-    new_guide = Guide(content=data['content'], link=data['link'], video=data['video'], image=data['image'], game_id=game.id)
-    game.guides.append(new_guide)
-    session.add(new_guide)
-    session.commit()
+        new_guide = Guide(content=content, link=link, video=video, image=image, game_id=game.id)
+        game.guides.append(new_guide)
+        session.add(new_guide)
+        session.commit()
 
-    return render_template('help_request_onother.html', message=f'New guide added successfully for game {data["game_name"]}'), 201
+        return render_template('help_request_onother.html', message=f'New guide added successfully for game {game_name}'), 201
+
+    return render_template('help_request_onother.html')
+
 
 
 @app.route('/help_p')
@@ -266,65 +285,97 @@ def help_o():
     return render_template('help_onother.html', guides=guides)
 
 
-@app.route('/edit_guide/<int:guide_id>', methods=['PUT'])
+@app.route('/edit_guide/<int:guide_id>', methods=['GET', 'POST'])
 @login_required
 def edit_guide(guide_id):
     """
     Route to edit an existing guide.
-    Expects a JSON payload with optional fields: content, link, video, image.
+    Handles form submission with fields: content, link, video, image.
     """
-    data = request.get_json()
     guide = session.query(Guide).get(guide_id)
 
     if not guide:
-        return jsonify({'error': 'Guide not found'}), 404
+        return render_template('error.html', message='Guide not found'), 404
 
-    if 'content' in data:
-        guide.content = data['content']
-    if 'link' in data:
-        guide.link = data['link']
-    if 'video' in data:
-        guide.video = data['video']
-    if 'image' in data:
-        guide.image = data['image']
+    if request.method == 'POST':
+        content = request.form.get('content')
+        link = request.form.get('link')
+        video = request.form.get('video')
+        image = request.form.get('image')
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        return jsonify({'error': 'An error occurred while updating the guide'}), 400
+        if content:
+            guide.content = content
+        if link:
+            guide.link = link
+        if video:
+            guide.video = video
+        if image:
+            guide.image = image
 
-    guides = session.query(Guide).all()
-    return render_template('helps_manager.html', guides=guides, message='Guide updated successfully'), 200
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
+            return render_template('edit_guide.html', guide=guide, error='An error occurred while updating the guide'), 400
+
+        guides = session.query(Guide).all()
+        return render_template('helps_manager.html', guides=guides, message='Guide updated successfully'), 200
+
+    return render_template('edit_guide.html', guide=guide)
 
 
-@app.route('/edit_pilarium_guide/<int:guide_id>', methods=['PUT'])
+
+@app.route('/edit_pilarium_guide/<int:guide_id>', methods=['GET', 'POST'])
 @login_required
 def edit_pilarium_guide(guide_id):
     """
     Route to edit an existing Pilarium guide.
-    Expects a JSON payload with optional fields: content, link, video, image.
+    Handles form submission with fields: content, link, video, image.
     """
-    data = request.get_json()
     guide = session.query(PilariumGuide).get(guide_id)
 
     if not guide:
-        return jsonify({'error': 'Guide not found'}), 404
+        return render_template('error.html', message='Guide not found'), 404
 
-    if 'content' in data:
-        guide.content = data['content']
-    if 'link' in data:
-        guide.link = data['link']
-    if 'video' in data:
-        guide.video = data['video']
-    if 'image' in data:
-        guide.image = data['image']
+    if request.method == 'POST':
+        content = request.form.get('content')
+        link = request.form.get('link')
+        video = request.form.get('video')
+        image = request.form.get('image')
 
-    try:
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-        return jsonify({'error': 'An error occurred while updating the guide'}), 400
+        if content:
+            guide.content = content
+        if link:
+            guide.link = link
+        if video:
+            guide.video = video
+        if image:
+            guide.image = image
 
-    pilarium_guides = session.query(PilariumGuide).all()
-    return render_template('helps_manager.html', pilarium_guides=pilarium_guides, message='Pilarium guide updated successfully'), 200
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
+            return render_template('edit_guide.html', guide=guide, error='An error occurred while updating the guide'), 400
+
+        pilarium_guides = session.query(PilariumGuide).all()
+        return render_template('helps_manager.html', pilarium_guides=pilarium_guides, message='Pilarium guide updated successfully'), 200
+
+    return render_template('edit_guide.html', guide=guide)
+
+
+
+@app.route('/profile', methods=['GET'])
+@login_required
+def profile():
+    """
+    Route to render the user's profile page with all guides created by the user.
+    """
+    token = request.headers.get('Authorization')
+    user_id = [key for key, value in tokens.items() if value == token][0]
+
+    user = session.query(User).get(user_id)
+    guides = session.query(Guide).filter_by(user_id=user_id).all()
+    pilarium_guides = session.query(PilariumGuide).filter_by(user_id=user_id).all()
+
+    return render_template('profile.html', user=user, guides=guides, pilarium_guides=pilarium_guides)
