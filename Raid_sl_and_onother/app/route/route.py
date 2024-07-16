@@ -140,7 +140,7 @@ def reset_password_request():
 
         # Validate request data
         if not identifier:
-            return render_template('reset_request.html', error='Identifier is required')
+            return render_template('reset.html', error='Identifier is required')
 
         user = session.query(User).filter(
             (User.username == identifier) |
@@ -149,14 +149,14 @@ def reset_password_request():
         ).first()
 
         if user is None:
-            return render_template('reset_request.html', error='User not found')
+            return render_template('reset.html', error='User not found')
 
         user.generate_reset_token()
         session.commit()
 
-        return render_template('reset_request.html', message='Password reset token generated', reset_token=user.reset_token)
+        return render_template('reset.html', message='Password reset token generated', reset_token=user.reset_token)
 
-    return render_template('reset_request.html')
+    return render_template('reset.html')
 
 
 
