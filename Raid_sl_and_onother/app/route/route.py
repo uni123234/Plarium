@@ -63,6 +63,7 @@ def register():
 
     return render_template('register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
@@ -92,6 +93,7 @@ def login():
         return render_template('login.html', message='Login successful', token=token)
 
     return render_template('login.html')
+
 
 @app.route('/edit_user', methods=['PUT'])
 @login_required
@@ -123,6 +125,7 @@ def edit_user():
 
     return jsonify({'message': 'User updated successfully'}), 200
 
+
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
     """
@@ -152,6 +155,7 @@ def reset_password_request():
 
     return render_template('reset.html')
 
+
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     """
@@ -178,12 +182,14 @@ def reset_password():
 
     return render_template('reset.html')
 
+
 @app.route('/help')
 def help():
     """
     Route to render the help page.
     """
     return render_template('help.html')
+
 
 @app.route('/helps_p_r', methods=['POST'])
 def add_guide_pilarium():
@@ -197,7 +203,7 @@ def add_guide_pilarium():
     if not all(key in data for key in ('content', 'link', 'video', 'image')):
         return jsonify({'error': 'Content, link, video, and image are required'}), 400
 
-    game_name = "Raid Shadow Legends"
+    game_name = ""
     game = session.query(Game).filter_by(name=game_name).first()
     if not game:
         return jsonify({'error': f'Game {game_name} not found'}), 404
@@ -208,6 +214,7 @@ def add_guide_pilarium():
     session.commit()
 
     return render_template('help_raid_sl_request.html', message='New guide added successfully for Raid Shadow Legends'), 201
+
 
 @app.route('/help_o_r', methods=['POST'])
 def add_guide_all_games():
@@ -232,6 +239,7 @@ def add_guide_all_games():
 
     return render_template('help_request_onother.html', message=f'New guide added successfully for game {data["game_name"]}'), 201
 
+
 @app.route('/help_p')
 def help_p():
     """
@@ -247,6 +255,7 @@ def help_p():
     
     return render_template('help_raid_sl.html', guides=guides)
 
+
 @app.route('/help_o')
 def help_o():
     """
@@ -255,6 +264,7 @@ def help_o():
     guides = session.query(Guide).join(Game).filter(Game.name != "Raid Shadow Legends").all()
     
     return render_template('help_onother.html', guides=guides)
+
 
 @app.route('/edit_guide/<int:guide_id>', methods=['PUT'])
 @login_required
@@ -286,6 +296,7 @@ def edit_guide(guide_id):
 
     guides = session.query(Guide).all()
     return render_template('helps_manager.html', guides=guides, message='Guide updated successfully'), 200
+
 
 @app.route('/edit_pilarium_guide/<int:guide_id>', methods=['PUT'])
 @login_required
