@@ -129,64 +129,6 @@ def edit_user():
     return render_template('edit_user.html', message='User updated successfully')
 
 
-@app.route('/reset_password_request', methods=['GET', 'POST'])
-def reset_password_request():
-    """
-    Route to request a password reset.
-    Handles form submission with field: identifier (username, email, or phone).
-    """
-    if request.method == 'POST':
-        identifier = request.form.get('identifier')
-
-        # Validate request data
-        if not identifier:
-            return render_template('reset.html', error='Identifier is required')
-
-        user = session.query(User).filter(
-            (User.username == identifier) |
-            (User.email == identifier) |
-            (User.phone == identifier)
-        ).first()
-
-        if user is None:
-            return render_template('reset.html', error='User not found')
-
-        user.generate_reset_token()
-        session.commit()
-
-        return render_template('reset.html', message='Password reset token generated', reset_token=user.reset_token)
-
-    return render_template('reset.html')
-
-
-
-@app.route('/reset_password', methods=['GET', 'POST'])
-def reset_password():
-    """
-    Route to reset the password.
-    Handles form submission with fields: reset_token and new_password.
-    """
-    if request.method == 'POST':
-        data = request.form
-
-        # Validate request data
-        if not all(key in data for key in ('reset_token', 'new_password')):
-            return render_template('reset.html', error='Reset token and new password are required')
-
-        user = session.query(User).filter_by(reset_token=data['reset_token']).first()
-
-        if user is None:
-            return render_template('reset.html', error='Invalid reset token')
-
-        user.set_password(data['new_password'])
-        user.reset_token = None
-        session.commit()
-
-        return render_template('reset.html', message='Password reset successful')
-
-    return render_template('reset.html')
-
-
 @app.route('/help')
 def help():
     """
