@@ -71,29 +71,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-            function applyTheme() {
-                var theme = localStorage.getItem('theme') || 'light';
-                if (theme === 'dark') {
-                    document.body.style.backgroundColor = 'black';
-                    document.body.style.color = 'white';
-                } else if (theme === 'grayscale') {
-                    document.body.style.backgroundColor = 'gray';
-                    document.body.style.color = 'black';
-                } else {
-                    document.body.style.backgroundColor = 'white';
-                    document.body.style.color = 'black';
-                }
+        function applyTheme() {
+            var theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.body.style.backgroundColor = '#2e2e2e';
+                document.body.style.color = 'white';
+            } else if (theme === 'grayscale') {
+                document.body.style.backgroundColor = 'gray';
+                document.body.style.color = 'black';
+            } else {
+                document.body.style.backgroundColor = 'white';
+                document.body.style.color = 'black';
             }
+        }
 
-            document.addEventListener('DOMContentLoaded', function () {
-                applyTheme();
-            });
+        document.addEventListener('DOMContentLoaded', function () {
+            applyTheme();
+        });
 
-            function saveTheme() {
-                var theme = document.getElementById('theme').value;
-                localStorage.setItem('theme', theme);
-                applyTheme();
-            }
+        function saveTheme() {
+            var theme = document.getElementById('theme').value;
+            localStorage.setItem('theme', theme);
+            applyTheme();
+        }
     </script>
 </body>
 
