@@ -3,14 +3,17 @@ html,
 body {
     height: 100%;
     margin: 0;
-}
-
-body {
-    background-color: white;
-    color: black;
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
+}
+
+/* Body Styles */
+body {
+    background-color: #000;
+    /* Black background */
+    color: #fff;
+    /* White text */
 }
 
 /* Container */
@@ -92,6 +95,19 @@ footer ul li {
     margin: 5px 10px;
 }
 
+/* Responsive Footer */
+@media (min-width: 768px) {
+    footer {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
+
+    footer ul {
+        justify-content: flex-start;
+    }
+}
+
 /* Alerts */
 .alert {
     padding: 15px;
@@ -112,37 +128,7 @@ footer ul li {
     color: #155724;
 }
 
-/* Theme Styles */
-body.dark {
-    background-color: black;
-    color: white;
-}
-
-body.grayscale {
-    background-color: gray;
-    color: black;
-}
-
-/* Responsive Footer */
-@media (min-width: 768px) {
-    footer {
-        flex-direction: row;
-        justify-content: space-between;
-        text-align: left;
-    }
-
-    footer ul {
-        justify-content: flex-start;
-    }
-}
-
-body {
-    background-color: #000;
-    /* Black background */
-    color: #fff;
-    /* White text */
-}
-
+/* Cards */
 .card {
     background-color: #333;
     /* Dark gray background for cards */
@@ -153,6 +139,7 @@ body {
     font-weight: bold;
 }
 
+/* List Group Items */
 .list-group-item {
     background-color: #444;
     /* Slightly lighter gray for list items */
@@ -170,4 +157,15 @@ body {
 .list-group-item a:hover {
     color: #ccc;
     /* Light gray on hover */
+}
+
+/* Theme Styles */
+body.dark {
+    background-color: black;
+    color: white;
+}
+
+body.grayscale {
+    background-color: gray;
+    color: black;
 }

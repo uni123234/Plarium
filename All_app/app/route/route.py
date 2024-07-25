@@ -14,18 +14,8 @@ from flask_login import (
     login_required,
 )
 from sqlalchemy.exc import IntegrityError
-from .config import login_manager, app, db_session, User, Game, Guide , tokens
+from .config import login_manager, app, db_session, User, Game, Guide , tokens, load_user, make_session_permanent
 import secrets
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return db_session.query(User).get(int(user_id))
-
-
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
 
 
 @app.route("/")
