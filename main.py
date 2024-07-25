@@ -1,4 +1,4 @@
-from Raid_sl_and_onother.app.route import app
+from All_app.app.route import app
 
 if __name__ == '__main__':
     app.run(debug=True)

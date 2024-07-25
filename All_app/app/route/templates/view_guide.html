@@ -1,0 +1,24 @@
+{% extends "base_help.html" %}
+
+{% block title %}{{ guide.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ guide.title }}</h2>
+    <p><strong>Game:</strong> {{ guide.game.name }}</p>
+    <div class="mb-4">
+        <p>{{ guide.content }}</p>
+    </div>
+    <div>
+        <p><strong>Related Links:</strong></p>
+        <ul>
+            <li><a href="{{ guide.link }}" target="_blank">Guide Link</a></li>
+            <li><a href="{{ guide.video }}" target="_blank">Guide Video</a></li>
+            <li><a href="{{ guide.image }}" target="_blank">Guide Image</a></li>
+        </ul>
+    </div>
+    <div class="mt-4">
+        <a href="{{ url_for('add_guide_all_games') }}" class="btn btn-secondary">Back to Guides</a>
+    </div>
+</div>
+{% endblock %}

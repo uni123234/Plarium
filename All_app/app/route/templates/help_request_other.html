@@ -1,0 +1,41 @@
+{% extends "base_help.html" %}
+
+{% block title %}Submit a New Guide{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Submit a New Guide for Any Game</h2>
+    <form method="POST" action="{{ url_for('add_guide_all_games') }}">
+        <div class="form-group">
+            <label for="game_name">Game Name</label>
+            <input type="text" class="form-control" id="game_name" name="game_name" required>
+        </div>
+        <div class="form-group">
+            <label for="title">Guide Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+            <label for="content">Content</label>
+            <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="link">Link</label>
+            <input type="url" class="form-control" id="link" name="link" required>
+        </div>
+        <div class="form-group">
+            <label for="video">Video</label>
+            <input type="url" class="form-control" id="video" name="video" required>
+        </div>
+        <div class="form-group">
+            <label for="image">Image URL</label>
+            <input type="url" class="form-control" id="image" name="image" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Guide</button>
+    </form>
+    {% if error %}
+    <div class="alert alert-danger mt-4">{{ error }}</div>
+    {% elif message %}
+    <div class="alert alert-success mt-4">{{ message }}</div>
+    {% endif %}
+</div>
+{% endblock %}

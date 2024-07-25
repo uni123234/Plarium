@@ -1,0 +1,15 @@
+{% extends "base_help.html" %}
+
+{% block title %}Other Games Help{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-light">Other Games Guides</h1>
+    <div class="list-group">
+        {% for guide in other_guides %}
+        <a href="/guide/{{ guide.id }}" class="list-group-item list-group-item-action bg-dark text-light">{{ guide.title
+            }}</a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
