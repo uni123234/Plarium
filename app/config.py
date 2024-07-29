@@ -2,10 +2,10 @@ from datetime import timedelta
 import logging
 from flask import Flask, session
 from flask_login import LoginManager
-from ...db.db import session as db_session, User, Guide, Game
+from db.db import session as db_session, User
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="frontend/templates", static_folder="frontend/static")
 app.secret_key = "supersecretkey"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 tokens = {}

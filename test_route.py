@@ -1,7 +1,7 @@
 import unittest
 from flask import json, url_for
-from .config import app, db_session, User, Game, Guide
-from ...db.db import Base, engine
+from app import app
+from db import Base, db_session, engine, User, Game, Guide
 
 
 class FlaskAppTests(unittest.TestCase):

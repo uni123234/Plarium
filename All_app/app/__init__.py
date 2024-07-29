@@ -1,1 +1,0 @@
-from .route.route import app
