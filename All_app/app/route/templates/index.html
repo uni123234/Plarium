@@ -6,17 +6,16 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <h2 class="text-center text-light">Top Game Guides</h2>
+            <h2 class="text-center text-light bg-dark p-4">Top Game Guides</h2>
 
             {% for game in games %}
-            <div class="card mb-4 bg-dark text-light">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">{{ game.name }}</h5>
                     <ul class="list-group list-group-flush">
                         {% for guide in game.guides %}
-                        <li class="list-group-item bg-dark text-light">
-                            <a href="/guide/{{ guide.id }}"
-                                class="list-group-item list-group-item-action bg-dark text-light">{{ guide.title }}</a>
+                        <li class="list-group-item">
+                            <a href="/guide/{{ guide.id }}">{{ guide.title }}</a>
                         </li>
                         {% endfor %}
                     </ul>
