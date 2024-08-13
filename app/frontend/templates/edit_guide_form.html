@@ -13,19 +13,19 @@
         </div>
         <div class="form-group">
             <label for="content">Content</label>
-            <textarea class="form-control" id="content" name="content" required>{{ guide.content }}</textarea>
+            <textarea class="form-control" id="content" name="content" rows="4" required>{{ guide.content }}</textarea>
         </div>
         <div class="form-group">
             <label for="link">Link</label>
-            <input type="text" class="form-control" id="link" name="link" value="{{ guide.link }}" required>
+            <input type="url" class="form-control" id="link" name="link" value="{{ guide.link }}" required>
         </div>
         <div class="form-group">
             <label for="video">Video</label>
-            <input type="text" class="form-control" id="video" name="video" value="{{ guide.video }}" required>
+            <input type="url" class="form-control" id="video" name="video" value="{{ guide.video }}" required>
         </div>
         <div class="form-group">
             <label for="image">Image</label>
-            <input type="text" class="form-control" id="image" name="image" value="{{ guide.image }}" required>
+            <input type="url" class="form-control" id="image" name="image" value="{{ guide.image }}" required>
         </div>
         <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>

@@ -3,6 +3,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
 <div class="container">
     <h2 class="mt-4">Login</h2>
     {% if error %}
@@ -11,7 +12,7 @@
     {% if message %}
     <div class="alert alert-success">{{ message }}</div>
     {% endif %}
-    <form method="POST" action="/login">
+    <form id="loginForm" method="POST" action="{{ url_for('login') }}">
         <div class="form-group">
             <label for="identifier">Username or Email or Phone</label>
             <input type="text" class="form-control" id="identifier" name="identifier" required>

@@ -1,4 +1,3 @@
-/* General Styles */
 html,
 body {
     height: 100%;
@@ -8,15 +7,26 @@ body {
     flex-direction: column;
 }
 
-/* Body Styles */
 body {
-    background-color: #000;
-    /* Black background */
-    color: #fff;
-    /* White text */
+    background-color: #fff;
+    color: #000;
 }
 
-/* Container */
+body.dark {
+    background-color: #2e2e2e;
+    color: white;
+}
+
+body.grayscale {
+    background-color: gray;
+    color: white;
+}
+
+body.black {
+    background-color: black;
+    color: white;
+}
+
 .container {
     flex: 1;
     max-width: 960px;
@@ -24,12 +34,10 @@ body {
     padding: 20px;
 }
 
-/* Header */
 header {
     margin-bottom: 20px;
 }
 
-/* Navbar */
 .navbar {
     margin-bottom: 20px;
 }
@@ -46,7 +54,6 @@ header {
     color: #ccc;
 }
 
-/* Form */
 .form-group {
     margin-bottom: 15px;
 }
@@ -57,7 +64,6 @@ header {
     padding: 10px;
 }
 
-/* Buttons */
 .btn-primary {
     background-color: #007bff;
     border-color: #007bff;
@@ -68,7 +74,6 @@ header {
     border-color: #004085;
 }
 
-/* Footer */
 footer {
     background-color: #343a40;
     color: white;
@@ -95,7 +100,6 @@ footer ul li {
     margin: 5px 10px;
 }
 
-/* Responsive Footer */
 @media (min-width: 768px) {
     footer {
         flex-direction: row;
@@ -108,7 +112,6 @@ footer ul li {
     }
 }
 
-/* Alerts */
 .alert {
     padding: 15px;
     margin-bottom: 20px;
@@ -128,44 +131,49 @@ footer ul li {
     color: #155724;
 }
 
-/* Cards */
 .card {
     background-color: #333;
-    /* Dark gray background for cards */
 }
 
 .card-title {
     font-size: 1.5em;
     font-weight: bold;
+    color: #fff;
 }
 
-/* List Group Items */
 .list-group-item {
     background-color: #444;
-    /* Slightly lighter gray for list items */
     border: none;
-    /* No borders on list items */
 }
 
 .list-group-item a {
     color: #fff;
-    /* White links */
     text-decoration: none;
-    /* No underline on links */
 }
 
 .list-group-item a:hover {
     color: #ccc;
-    /* Light gray on hover */
 }
 
-/* Theme Styles */
-body.dark {
-    background-color: black;
-    color: white;
+.nav-tabs {
+    border-bottom: 2px solid #007bff;
 }
 
-body.grayscale {
-    background-color: gray;
-    color: black;
+.nav-link {
+    border: 1px solid transparent;
+    border-radius: 0.25rem 0.25rem 0 0;
+    padding: 10px 15px;
+    margin-right: 2px;
+    background-color: #343a40;
+    color: #fff;
+}
+
+.nav-link.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.nav-link:hover {
+    background-color: #495057;
 }

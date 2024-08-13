@@ -1,0 +1,15 @@
+body.light {
+    background-color: white;
+}
+
+body.dark {
+    background-color: #2e2e2e;
+}
+
+body.grayscale {
+    background-color: gray;
+}
+
+body.black {
+    background-color: black;
+}

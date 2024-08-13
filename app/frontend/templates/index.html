@@ -15,7 +15,7 @@
                     <ul class="list-group list-group-flush">
                         {% for guide in game.guides %}
                         <li class="list-group-item">
-                            <a href="/guide/{{ guide.id }}">{{ guide.title }}</a>
+                            <a href="{{ url_for('guide', guide_id=guide.id) }}">{{ guide.title }}</a>
                         </li>
                         {% endfor %}
                     </ul>

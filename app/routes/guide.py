@@ -1,43 +1,58 @@
-import logging, os
-from logging.handlers import RotatingFileHandler
+"""
+Guide-related routes for the application.
+
+This module includes routes for viewing, adding, editing, and deleting guides,
+as well as adding new games and viewing guides for games other than 'Raid 
+Shadow Legends'.
+"""
+
 from flask import (
     jsonify,
-    redirect,
     render_template,
     request,
     session,
-    url_for,
+    Response,
 )
-from flask_login import (
-    login_required,
-)
+from flask_login import login_required
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from ..config import (
-    app,
-)
-from db import (
-    db_session,
-    Game,
-    Guide,
-)
+
+from db import db_session, Game, Guide
+from ..config import app
+from .validators import GuideForm, GameForm
 
 
 @app.route("/guide/<int:guide_id>", methods=["GET"])
 @login_required
-def view_guide(guide_id):
+def view_guide(guide_id: int) -> Response:
+    """
+    View a specific guide by its ID.
+
+    This endpoint allows logged-in users to view the details of a guide specified
+    by its ID. If the guide is not found, a 404 error is returned. If there is
+    a database error during the query, a 500 error is returned.
+
+    Args:
+        guide_id (int): The unique identifier of the guide to retrieve.
+
+    Returns:
+        Response: Renders the 'view_guide.html' template if the guide is found,
+                  otherwise renders the 'error.html' template with a 404 status code.
+    """
     try:
         guide = db_session.query(Guide).filter_by(id=guide_id).first()
-        if not guide:
-            app.logger.warning(f"Guide with ID {guide_id} not found.")
+        if guide is None:
+            app.logger.warning("Guide with ID %d not found.", guide_id)
             return (
                 render_template(
                     "error.html", error=f"Guide with ID {guide_id} not found."
                 ),
                 404,
             )
+
         return render_template("view_guide.html", guide=guide)
-    except SQLAlchemyError as e:
-        app.logger.error(f"Database error: {str(e)}")
+
+    except SQLAlchemyError as error:
+        app.logger.error("Database error: %s", str(error))
         return (
             render_template(
                 "error.html", error="An error occurred while fetching the guide."
@@ -48,122 +63,147 @@ def view_guide(guide_id):
 
 @app.route("/help_o_r", methods=["GET", "POST"])
 @login_required
-def add_guide_all_games():
+def add_guide_all_games() -> Response:
+    """
+    Add a new guide for a game.
+
+    This endpoint provides functionality for logged-in users to add a new guide
+    for a game. The user must provide the game name, title, content, link, video,
+    and image. If any required fields are missing or the user is not authenticated,
+    an error is returned. Upon successful addition, the user is notified and the
+    guide is saved to the database. Handles errors related to database operations
+    and integrity.
+
+    Returns:
+        Response: Renders the 'help_request_other.html' template with a success
+                  message or error.
+    """
+    form = GuideForm(request.form)  # Create a form instance with the incoming data
+
     if request.method == "POST":
-        game_name = request.form.get("game_name")
-        title = request.form.get("title")
-        content = request.form.get("content")
-        link = request.form.get("link")
-        video = request.form.get("video")
-        image = request.form.get("image")
+        if not form.validate():
+            app.logger.warning("Guide addition attempt with invalid fields.")
+            error_message = "All fields are required"
+        else:
+            form_data = {
+                "game_name": form.game_name.data,
+                "title": form.title.data,
+                "content": form.content.data,
+                "link": form.link.data,
+                "video": form.video.data,
+                "image": form.image.data,
+            }
 
-        user_id = session.get("user_id")
-        if not user_id:
-            app.logger.warning("Unauthenticated guide addition attempt.")
-            return jsonify({"error": "User not authenticated"}), 401
-
-        if not all([game_name, title, content, link, video, image]):
-            app.logger.warning("Guide addition attempt with missing fields.")
-            return (
-                render_template(
-                    "help_request_other.html", error="All fields are required"
-                ),
-                400,
-            )
-
-        try:
-            game = db_session.query(Game).filter_by(name=game_name).first()
-            if not game:
-                app.logger.warning(
-                    f"Guide addition attempt for non-existent game: {game_name}."
-                )
+            user_id = session.get("user_id")
+            if not user_id:
+                app.logger.warning("Unauthenticated guide addition attempt.")
                 return (
-                    render_template(
-                        "help_request_other.html", error=f"Game {game_name} not found"
-                    ),
-                    404,
-                )
+                    jsonify({"error": "User not authenticated"}),
+                    401,
+                )  # Return 401 if the user is not authenticated
 
-            new_guide = Guide(
-                title=title,
-                content=content,
-                link=link,
-                video=video,
-                image=image,
-                game_id=game.id,
-                user_id=user_id,
-            )
-            db_session.add(new_guide)
-            db_session.commit()
-            app.logger.info(
-                f"New guide added successfully for game {game_name} by user {user_id}."
-            )
-            return (
-                render_template(
-                    "help_request_other.html",
-                    message=f"New guide added successfully for game {game_name}",
-                ),
-                201,
-            )
-        except IntegrityError as e:
-            db_session.rollback()
-            app.logger.warning("Guide addition failed due to database integrity error.")
-            return (
-                render_template(
-                    "help_request_other.html",
-                    error="Database error occurred. Please ensure all fields are correct.",
-                ),
-                400,
-            )
-        except SQLAlchemyError as e:
-            db_session.rollback()
-            app.logger.error(f"Database error: {str(e)}")
-            return (
-                render_template(
-                    "help_request_other.html",
-                    error="An error occurred while adding the guide.",
-                ),
-                500,
-            )
+            game_name = form_data["game_name"]
+
+            try:
+                game = db_session.query(Game).filter_by(name=game_name).first()
+                if game is None:
+                    app.logger.warning(
+                        "Guide addition attempt for non-existent game: %s.", game_name
+                    )
+                    error_message = f"Game {game_name} not found"
+                else:
+                    new_guide = Guide(
+                        title=form_data["title"],
+                        content=form_data["content"],
+                        link=form_data["link"],
+                        video=form_data["video"],
+                        image=form_data["image"],
+                        game_id=game.id,
+                        user_id=user_id,
+                    )
+                    db_session.add(new_guide)
+                    db_session.commit()
+                    app.logger.info(
+                        "New guide added successfully for game %s by user %d.",
+                        game_name,
+                        user_id,
+                    )
+                    return (
+                        render_template(
+                            "help_request_other.html",
+                            message=f"New guide added successfully for game {game_name}",
+                        ),
+                        201,
+                    )
+            except IntegrityError:
+                db_session.rollback()
+                app.logger.warning(
+                    "Guide addition failed due to database integrity error."
+                )
+                error_message = (
+                    "Database error occurred. Please ensure all fields are correct."
+                )
+            except SQLAlchemyError as error:
+                db_session.rollback()
+                app.logger.error("Database error: %s", str(error))
+                error_message = "An error occurred while adding the guide."
+
+        return render_template("help_request_other.html", error=error_message), 400
 
     return render_template("help_request_other.html")
 
 
 @app.route("/add_game", methods=["GET", "POST"])
 @login_required
-def add_game():
-    if request.method == "POST":
-        game_name = request.form.get("game_name")
+def add_game() -> Response:
+    """
+    Add a new game.
 
-        if not game_name:
-            app.logger.warning("Game addition attempt with missing fields.")
+    This endpoint allows logged-in users to add a new game by providing a game name.
+    If the provided game name already exists in the database, an error message is
+    returned. On successful addition, a confirmation message is displayed.
+
+    Returns:
+        Response: Renders the 'add_game.html' template with a success message or error.
+    """
+    form = GameForm(request.form)
+
+    if request.method == "POST":
+        if not form.validate():
+            app.logger.warning("Game addition attempt with invalid fields.")
             return render_template("add_game.html", error="Game name is required")
+
+        game_name = form.game_name.data
 
         try:
             existing_game = db_session.query(Game).filter_by(name=game_name).first()
             if existing_game:
                 app.logger.warning(
-                    f"Game addition attempt for existing game: {game_name}."
+                    "Game addition attempt for existing game: %s.", game_name
                 )
                 return render_template("add_game.html", error="Game already exists")
 
             game = Game(name=game_name)
             db_session.add(game)
-
             db_session.commit()
-            app.logger.info(f"New game {game_name} added successfully.")
+            app.logger.info("New game %s added successfully.", game_name)
             return render_template(
                 "add_game.html", message="New game added successfully"
             )
+
         except IntegrityError:
             db_session.rollback()
             app.logger.warning("Game addition failed due to database integrity error.")
-            return render_template(
-                "add_game.html", error="An error occurred while adding the game"
+            return (
+                render_template(
+                    "add_game.html", error="An error occurred while adding the game"
+                ),
+                400,
             )
-        except SQLAlchemyError as e:
+
+        except SQLAlchemyError as error:
             db_session.rollback()
-            app.logger.error(f"Database error: {str(e)}")
+            app.logger.error("Database error: %s", str(error))
             return (
                 render_template(
                     "error.html", error="An error occurred while adding the game."
@@ -175,85 +215,33 @@ def add_game():
 
 
 @app.route("/help_o")
-def help_other_games():
+def help_other_games() -> Response:
+    """
+    Display guides for games other than 'Raid Shadow Legends'.
+
+    This endpoint retrieves and displays all guides related to games other than
+    'Raid Shadow Legends'. It fetches all games excluding 'Raid Shadow Legends'
+    and then collects all guides associated with those games.
+
+    Returns:
+        Response: Renders the 'help_other.html' template with a list of guides.
+    """
     try:
         games = db_session.query(Game).filter(Game.name != "Raid Shadow Legends").all()
+        other_guides = [
+            guide
+            for game in games
+            for guide in db_session.query(Guide).filter_by(game_id=game.id).all()
+        ]
 
-        other_guides = []
-        for game in games:
-            guides = db_session.query(Guide).filter_by(game_id=game.id).all()
-            other_guides.extend(guides)
+        return render_template("help_other.html", guides=other_guides)
 
-        return render_template("help_other.html", other_guides=other_guides)
-    except SQLAlchemyError as e:
-        app.logger.error(f"Database error: {str(e)}")
+    except SQLAlchemyError as error:
+        app.logger.error("Database error: %s", str(error))
         return (
             render_template(
-                "error.html", error="An error occurred while fetching other games."
+                "error.html",
+                error="An error occurred while fetching guides for other games.",
             ),
             500,
         )
-
-
-@app.route("/edit_guide/<int:guide_id>", methods=["GET", "POST"])
-@login_required
-def edit_guide(guide_id):
-    try:
-        guide = db_session.query(Guide).get(guide_id)
-        if not guide or guide.user_id != session.get("user_id"):
-            app.logger.warning(
-                f"Unauthorized guide edit attempt for guide ID: {guide_id}."
-            )
-            return jsonify({"error": "Guide not found or not authorized"}), 404
-
-        if request.method == "POST":
-            guide.title = request.form.get("title")
-            guide.content = request.form.get("content")
-            guide.link = request.form.get("link")
-            guide.video = request.form.get("video")
-            guide.image = request.form.get("image")
-            db_session.commit()
-            app.logger.info(
-                f"Guide {guide_id} edited successfully by user {session.get('user_id')}."
-            )
-            return redirect(url_for("profile"))
-
-        return render_template("edit_guide_form.html", guide=guide)
-    except SQLAlchemyError as e:
-        app.logger.error(f"Database error: {str(e)}")
-        return (
-            render_template(
-                "error.html", error="An error occurred while editing the guide."
-            ),
-            500,
-        )
-
-
-@app.route("/delete_guide/<int:guide_id>")
-@login_required
-def delete_guide(guide_id):
-    try:
-        guide = db_session.query(Guide).get(guide_id)
-        if not guide or guide.user_id != session.get("user_id"):
-            app.logger.warning(
-                f"Unauthorized guide deletion attempt for guide ID: {guide_id}."
-            )
-            return jsonify({"error": "Guide not found or not authorized"}), 404
-
-        db_session.delete(guide)
-        db_session.commit()
-        app.logger.info(
-            f"Guide {guide_id} deleted successfully by user {session.get('user_id')}."
-        )
-        return redirect(url_for("profile"))
-    except SQLAlchemyError as e:
-        db_session.rollback()
-        app.logger.error(f"Database error: {str(e)}")
-        return (
-            render_template(
-                "error.html", error="An error occurred while deleting the guide."
-            ),
-            500,
-        )
-
-

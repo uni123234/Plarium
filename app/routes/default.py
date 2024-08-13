@@ -1,19 +1,24 @@
-from flask import (
-    render_template,
-)
+"""
+Routes for the application.
+
+This module defines the routes for the index and help pages, 
+and handles fetching data from the database.
+"""
+
+from flask import render_template
 from sqlalchemy.exc import SQLAlchemyError
-from ..config import (
-    app,
-)
-from db import (
-    db_session,
-    Game,
-    Guide,
-)
+from db import db_session, Game, Guide  # Third-party import
+from ..config import app  # Local import
 
 
 @app.route("/")
 def index():
+    """
+    Render the index page with a list of games, guides, and top guides.
+
+    Returns:
+        Rendered template of the index page with games, guides, and top guides data.
+    """
     try:
         games = db_session.query(Game).all()
         guides = db_session.query(Guide).all()
@@ -27,7 +32,7 @@ def index():
             top_guides=top_guides,
         )
     except SQLAlchemyError as e:
-        app.logger.error(f"Database error: {str(e)}")
+        app.logger.error("Database error: %s", e)
         return (
             render_template(
                 "error.html", error="An error occurred while fetching data."
@@ -37,5 +42,11 @@ def index():
 
 
 @app.route("/help")
-def help():
+def help_page():
+    """
+    Render the help page.
+
+    Returns:
+        Rendered template of the help page.
+    """
     return render_template("help.html")

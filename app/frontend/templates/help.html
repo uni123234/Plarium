@@ -43,7 +43,7 @@
 
         <div class="col-md-6">
             <h2>Add a New Game</h2>
-            <form method="POST" action="/add_game">
+            <form method="POST" action="{{ url_for('add_game') }}">
                 <div class="form-group">
                     <label for="game_name_new">Game Name</label>
                     <input type="text" class="form-control" id="game_name_new" name="game_name" required>

@@ -9,6 +9,7 @@
         href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA/4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAQAAAAAAAAABEQAAAAAAAAABAAAAAAAAAAEAAAAAAAABEQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAPv/AAD//wAA+/8AAPv/AAD4/wAA/v8AAP7/AAD4/wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='theme.css') }}">
 </head>
 
 <body>
@@ -62,39 +63,16 @@
         <p>Інформація про розробників:</p>
         <ul class="list-unstyled">
             <li><a class="text-white" href="https://github.com/uni123234" target="_blank">Андрій | uni123234</a></li>
-            <li><a class="text-white" href="https://github.com/SashaOboroshniyUa" target="_blank">Саша |
-                    SashaOboroshniyUa</a></li>
+            <li><a class="text-white" href="https://github.com/SashaOboroshniyUa" target="_blank">Саша | SashaOboroshniyUa</a></li>
         </ul>
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        function applyTheme() {
-            var theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') {
-                document.body.style.backgroundColor = '#2e2e2e';
-                document.body.style.color = 'white';
-            } else if (theme === 'grayscale') {
-                document.body.style.backgroundColor = 'gray';
-                document.body.style.color = 'black';
-            } else {
-                document.body.style.backgroundColor = 'white';
-                document.body.style.color = 'black';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            applyTheme();
-        });
-
-        function saveTheme() {
-            var theme = document.getElementById('theme').value;
-            localStorage.setItem('theme', theme);
-            applyTheme();
-        }
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/validation.js') }}"></script>
 </body>
 
 </html>
